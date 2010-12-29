@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test of Twinput</title>
+</head>
+
+<body>
+    Sample Input: 
+    <input type="text" class="twitter">
+    <button></button>
+    
+    <script src="../../../vendor/jquery/jquery-1.4.4.js"></script>
+    <script src="../../../plugin/src/twinput.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("button").html('Run Test');
+            $("button").click(function() {
+                $(".twitter").twinput();
+            });
+        });
+    </script>
+</body>
+</html>

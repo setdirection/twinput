@@ -1,0 +1,9 @@
+twinput: jQuery plugin to add rich twitter input to inputs
+
+Examples
+
+$('.twitter').twinput() // simple, use defaults on any class='twitter'
+
+$('input[twitter]').twinput({ // twitter types and change defaults
+    autoShrinkURLs: false
+})
