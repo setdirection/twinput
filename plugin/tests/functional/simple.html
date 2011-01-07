@@ -2,22 +2,23 @@
 <html>
 <head>
     <title>Simple Test of Twinput</title>
+    <link rel="stylesheet" type="text/css" href="simple.css" media="screen" />
 </head>
 
 <body>
-    Sample Input: 
-    <input type="text" class="twitter">
-    <button></button>
+  <div style="width: 500px; ">
+    <div><span class="title">Say Something:</span></div>
+    <div class="twinputdiv"><textarea class="twitter"></textarea></div>
+  </div>
     
-    <script src="../../../vendor/jquery/jquery-1.4.4.js"></script>
-    <script src="../../../plugin/src/twinput.js"></script>
-    <script>
-        $(document).ready(function() {
-            $("button").html('Run Test');
-            $("button").click(function() {
-                $(".twitter").twinput();
-            });
-        });
-    </script>
+  <script src="../../../vendor/jquery/jquery-1.4.4.js"></script>
+  <script src="../../../plugin/src/twinput.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      $(".twitter").twinput();
+      
+    });
+  </script>
 </body>
 </html>
