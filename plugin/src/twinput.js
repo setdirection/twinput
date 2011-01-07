@@ -44,7 +44,7 @@
   };
 
   // Func to update the remaining char count field
-  var updateCount = function(textarea, elem) {
+  var updateCount = function(textarea, elem, btn) {
     var val = textarea.val();
     var len = val ? val.length : 0;
     var remain = MAX_CHARS - len;
@@ -53,10 +53,16 @@
     elem.css("color", getCountColorGradient(remain));
     
     textarea.css("background-color", getInputColorGradient(remain/140.0));
+    if (len > 0 && len < (MAX_CHARS+1)) {
+      console.log("Enabling button " + btn.html());
+      btn.removeAttr('DISABLED');
+    } else {
+      btn.attr('DISABLED', true);
+    }
   };
   
-  var updateInput = function(textarea, countElem) {
-    updateCount(textarea, countElem);
+  var updateInput = function(textarea, countElem, btn) {
+    updateCount(textarea, countElem, btn);
     
     // Is this too expensive to do every keypress event?
     sessionStorage.savedTweet = textarea.val();
@@ -70,16 +76,16 @@
     }
   };
   
-  var clearTweet = function(textarea, countElem) {
+  var clearTweet = function(textarea, countElem, btn) {
     textarea.val("");
-    updateCount(textarea, countElem);
+    updateCount(textarea, countElem, btn);
   };
   
-  var reloadTweet = function(textarea, countElem) {
+  var reloadTweet = function(textarea, countElem, btn) {
     var savedTweet = sessionStorage.savedTweet;
     if (savedTweet) {
       textarea.val(savedTweet);
-      updateCount(textarea, countElem);
+      updateCount(textarea, countElem, btn);
     }
   };
   
@@ -109,27 +115,29 @@
     return this.each(function() {  
             
       var textarea = $(this);
+      var tweetBtn = $("#tweetbtn");
+      tweetBtn.attr('DISABLED', true);
 
       // I'm not happy to hook up two events here, but the DEL key doesn't generate a keypress event
       // and if you hold a key down it doesn't update the display unless both keyup and keydown are registered
       textarea.keyup(function() {
-        updateInput(textarea, $("#charcount"));
+        updateInput(textarea, $("#charcount"), tweetBtn);
       });
       
       textarea.keydown(function() {
-        updateInput(textarea, $("#charcount"));
+        updateInput(textarea, $("#charcount"), tweetBtn);
       });
       
-      $("#tweetbtn").click(function() {
+      tweetBtn.click(function() {
         sendTweet(textarea.val());
       });
       
       $("#cleartweet").click(function() {
-        clearTweet(textarea, $("#charcount"));
+        clearTweet(textarea, $("#charcount"), tweetBtn);
       });
       
       $("#reloadtweet").click(function() {
-        reloadTweet(textarea, $("#charcount"));
+        reloadTweet(textarea, $("#charcount"), tweetBtn);
       });
 
     });
