@@ -54,7 +54,6 @@
     
     textarea.css("background-color", getInputColorGradient(remain/140.0));
     if (len > 0 && len < (MAX_CHARS+1)) {
-      console.log("Enabling button " + btn.html());
       btn.removeAttr('DISABLED');
     } else {
       btn.attr('DISABLED', true);
