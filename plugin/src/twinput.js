@@ -92,9 +92,6 @@
   
   var updateInput = function(textarea, countElem, btn) {
     var remain = updateCount(textarea, countElem, btn);
-    
-    // Is this too expensive to do every keypress event?
-    localStorage.savedTweet = textarea.val();
     return remain;
   };
   
@@ -139,6 +136,15 @@
     }
   };
   
+  var doIntervalStuff = function(textarea, countElem, btn) {
+    // Save tweet
+    var text = textarea.val();
+    
+    if (text) {
+      localStorage.savedTweet = textarea.val();
+    }
+  };
+  
   $.fn.twinput = function(opts) {
     var defaults = {
       onlyShrinkWhenNeeded : true,  // if there is plenty of space, don't shrink the URLs or words
@@ -166,16 +172,17 @@
             
       var textarea = $(this);
       var tweetBtn = $("#tweetbtn");
+      var charCount = $("#charcount");
       tweetBtn.attr('DISABLED', true);
 
       // I'm not happy to hook up two events here, but the DEL key doesn't generate a keypress event
       // and if you hold a key down it doesn't update the display unless both keyup and keydown are registered
       textarea.keyup(function() {
-        updateInput(textarea, $("#charcount"), tweetBtn);
+        updateInput(textarea, charCount, tweetBtn);
       });
       
       textarea.keydown(function() {
-        updateInput(textarea, $("#charcount"), tweetBtn);
+        updateInput(textarea, charCount, tweetBtn);
       });
       
       tweetBtn.click(function() {
@@ -183,16 +190,18 @@
       });
       
       $("#cleartweet").click(function() {
-        clearTweet(textarea, $("#charcount"), tweetBtn);
+        clearTweet(textarea, charCount, tweetBtn);
       });
       
       $("#reloadtweet").click(function() {
-        reloadTweet(textarea, $("#charcount"), tweetBtn);
+        reloadTweet(textarea, charCount, tweetBtn);
       });
 
       $("#shrinktweet").click(function() {
-        shrinkTweet(textarea, $("#charcount"));
+        shrinkTweet(textarea, charCount);
       });
+      
+      var timer = setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, 2000); 
 
     });
     
