@@ -159,17 +159,14 @@
       expandTypingArea     : false  // the input is made larger so you can see everything
     };
 
-    // If options are passed in, merge them with the defaults (options win)
-    if (opts) {
-      $.extend(defaults, opts);
-    }
-
+    // merge opts to clobber defaults
+    opts = $.extend({}, defaults, opts);
+    
     // Add buttons and counter after textarea div
     $('<div style="float: right;"><span id="charcount" class="tweet-counter">140</span><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button><button id="tweetbtn">Tweet</button></div>').appendTo(".twinputdiv");
     
     // This runs for all of the matches
     return this.each(function() {  
-            
       var textarea = $(this);
       var tweetBtn = $("#tweetbtn");
       var charCount = $("#charcount");
