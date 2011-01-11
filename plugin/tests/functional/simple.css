@@ -1,5 +1,5 @@
 textarea.twitter {
-    background-color: #98FB98;
+    background-color: rgba(152, 251, 152, 0.2); /*#98FB98;*/
     border: 1px solid #BFBFBF;
     border-bottom-left-radius: 4px 4px;
     border-bottom-right-radius: 4px 4px;

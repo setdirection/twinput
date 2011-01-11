@@ -22,7 +22,7 @@
     var red = parseInt(255.0*(1.0-n), 10); 
     var blue = parseInt(152.0*n, 10);
     
-    return "rgb(" + red + "," + green + "," + blue + ")";
+    return "rgba(" + red + "," + green + "," + blue + ", 0.2)";
   };
   
   var getCountColorGradient = function(remain) {
