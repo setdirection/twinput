@@ -16,6 +16,7 @@
 
   var MAX_CHARS = 140;
   var NUM_NERVOUS_CHARS = 140; // Number of remaining chars to start getting nervous about reaching max length
+  var TIMER_INTERVAL = 2000; // Interval for periodic tasks, e.g. saving tweet, etc.
   
   var getInputColorGradient = function(n) {
     var green = parseInt(251.0*n, 10);
@@ -68,13 +69,13 @@
     var key = "R_edcd67a19bc686f2b667e39e07cf1fc1";
     
     $.getJSON("http://api.bit.ly/v3/shorten?callback=?",
-              {
-                login: user,
-                apiKey: key,
-                longUrl: url,
-                format: "json"
-              },
-              function(data) { callback(data.data.url, url); });
+      {
+        login: user,
+        apiKey: key,
+        longUrl: url,
+        format: "json"
+      },
+      function(data) { callback(data.data.url, url); });
     
     //TODO how to return the shortened URL?
   };
@@ -106,9 +107,12 @@
     
     var callback = function(shortUrl, longUrl){ replaceLongUrl(textarea, shortUrl, longUrl, countElem); };
     
-    while ((result = parse_url.exec(text))) {
+    while (true) {
+      result = parse_url.exec(text);
       if (result) {
         shortenUrl(result[0], callback);
+      } else {
+        break;
       }
     }
     
@@ -158,12 +162,37 @@
       useCharacterPalette  : true,  // allow the palette action to popup a palette of chars
       expandTypingArea     : false  // the input is made larger so you can see everything
     };
+    
+    var saveOptions = function(options) {
+      var optionsString = JSON.stringify(options);
+      localStorage.options = optionsString;
+    };
+    
+    var getOptions = function() {
+      var optionsString = localStorage.options;
+      if (optionsString) {
+        var options = JSON.parse(optionsString);
+        return options;
+      }
+      return null;
+    };
+    
+    var updateOptions = function(options) {
+      // Why doesn't $("#autoshrinku").attr('checked', boolean); work?
+      $('input[id=autoshrinku]').attr('checked', options.autoShrinkURLs);
+      $('input[id=autoshrinkw]').attr('checked', options.autoShrinkWords);
+      $('input[id=locationopt]').attr('checked', options.useLocation);
+    };
 
     // merge opts to clobber defaults
-    opts = $.extend({}, defaults, opts);
+    opts = $.extend({}, defaults, opts, getOptions());
     
     // Add buttons and counter after textarea div
-    $('<div style="float: right;"><span id="charcount" class="tweet-counter">140</span><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button><button id="tweetbtn">Tweet</button></div>').appendTo(".twinputdiv");
+    $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs</div><div id="counterdiv" style="float: right;">' +
+      '<span id="charcount" class="tweet-counter">140</span></div></div>').appendTo(".twinputdiv");
+    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
+    
+    updateOptions(opts);
     
     // This runs for all of the matches
     return this.each(function() {  
@@ -198,7 +227,22 @@
         shrinkTweet(textarea, charCount);
       });
       
-      var timer = setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, 2000); 
+      $("#locationopt").click(function() {
+        opts.useLocation = $("#locationopt").attr('checked');
+        saveOptions(opts);
+      });
+      
+      $("#autoshrinkw").click(function() {
+        opts.autoShrinkWords = $("#autoshrinkw").attr('checked');
+        saveOptions(opts);
+      });
+      
+      $("#autoshrinku").click(function() {
+        opts.autoShrinkURLs = $("#autoshrinku").attr('checked');
+        saveOptions(opts);
+      });
+      
+      var timer = setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, TIMER_INTERVAL); 
 
     });
     
