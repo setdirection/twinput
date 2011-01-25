@@ -17,6 +17,7 @@
   var MAX_CHARS = 140;
   var NUM_NERVOUS_CHARS = 140; // Number of remaining chars to start getting nervous about reaching max length
   var TIMER_INTERVAL = 2000; // Interval for periodic tasks, e.g. saving tweet, etc.
+  var MIN_URL_LEN = 20; // URLs need to be more than this in order to bother shortening
   
   var getInputColorGradient = function(n) {
     var green = parseInt(251.0*n, 10);
@@ -76,15 +77,13 @@
         format: "json"
       },
       function(data) { callback(data.data.url, url); });
-    
-    //TODO how to return the shortened URL?
   };
   
   var replaceLongUrl = function(textarea, shortUrl, longUrl, countElem) {
-    //alert("replaceLongUrl " + shortUrl + " long " + longUrl);
-    var text = textarea.val();
-    console.log("replaceLongUrl long: " + longUrl + " short: " + shortUrl);
+    var text;
     if (shortUrl && longUrl) {
+      text = textarea.val();
+      console.log("replaceLongUrl long: " + longUrl + " with short: " + shortUrl);
       textarea.val(text.replace(longUrl, shortUrl));
     }
     
@@ -110,7 +109,10 @@
     while (true) {
       result = parse_url.exec(text);
       if (result) {
-        shortenUrl(result[0], callback);
+        console.log("shrinkTweet url: " + result[0]);
+        if (result[0].length > MIN_URL_LEN) {
+          shortenUrl(result[0], callback);
+        }
       } else {
         break;
       }
@@ -183,7 +185,17 @@
       $('input[id=autoshrinkw]').attr('checked', options.autoShrinkWords);
       $('input[id=locationopt]').attr('checked', options.useLocation);
     };
-
+    
+    var handleKeyDown = function(event, textarea, charCount, tweetBtn) {
+      updateInput(textarea, charCount, tweetBtn);
+      //console.log("handleKeyDown keyCode: " + event.keyCode);
+      //var character = event.keyCode ? String.fromCharCode(event.keyCode) : null;
+      //console.log("Keydown char: " + character);
+      if (event.keyCode === 32 && opts.autoShrinkURLs) {
+        shrinkTweet(textarea, charCount);
+      }
+    };
+    
     // merge opts to clobber defaults
     opts = $.extend({}, defaults, opts, getOptions());
     
@@ -201,14 +213,8 @@
       var charCount = $("#charcount");
       tweetBtn.attr('DISABLED', true);
 
-      // I'm not happy to hook up two events here, but the DEL key doesn't generate a keypress event
-      // and if you hold a key down it doesn't update the display unless both keyup and keydown are registered
-      textarea.keyup(function() {
-        updateInput(textarea, charCount, tweetBtn);
-      });
-      
-      textarea.keydown(function() {
-        updateInput(textarea, charCount, tweetBtn);
+      textarea.keydown(function(event) {
+        handleKeyDown(event, textarea, charCount, tweetBtn);
       });
       
       tweetBtn.click(function() {
