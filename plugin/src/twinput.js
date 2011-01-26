@@ -15,7 +15,7 @@
 (function($) {
 
   var MAX_CHARS = 140;
-  var NUM_NERVOUS_CHARS = 140; // Number of remaining chars to start getting nervous about reaching max length
+  var NUM_NERVOUS_CHARS = MAX_CHARS - 10; // Length of tweet when to start getting nervous about reaching max length
   var TIMER_INTERVAL = 2000; // Interval for periodic tasks, e.g. saving tweet, etc.
   var MIN_URL_LEN = 20; // URLs need to be more than this in order to bother shortening
   
@@ -95,32 +95,6 @@
     return remain;
   };
   
-  // Shrink URLs, common words, etc.
-  var shrinkTweet = function(textarea, countElem) {
-    var result;
-    var text = textarea.val();
-    // Stolen from Crockford
-    // var parse_url = /(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?/g;
-    // Stolen from http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-    var parse_url = /\b((?:[a-z][\w]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?]))/gmi;
-    
-    var callback = function(shortUrl, longUrl){ replaceLongUrl(textarea, shortUrl, longUrl, countElem); };
-    
-    while (true) {
-      result = parse_url.exec(text);
-      if (result) {
-        console.log("shrinkTweet url: " + result[0]);
-        if (result[0].length > MIN_URL_LEN) {
-          shortenUrl(result[0], callback);
-        }
-      } else {
-        break;
-      }
-    }
-    
-    updateInput(textarea, countElem);
-  };
-  
   var sendTweet = function(val) {
     if (val) {
       alert("Sent the tweet: " + val);
@@ -165,6 +139,40 @@
       expandTypingArea     : false  // the input is made larger so you can see everything
     };
     
+    // Shrink URLs, common words, etc.
+    var shrinkTweet = function(textarea, countElem) {
+      var result;
+      var text = textarea.val();
+      // Stolen from Crockford
+      // var parse_url = /(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?/g;
+      // Stolen from http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+      var parse_url = /\b((?:[a-z][\w]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?]))/gmi;
+
+      var callback = function(shortUrl, longUrl){ replaceLongUrl(textarea, shortUrl, longUrl, countElem); };
+
+      if (!text) {
+        return;
+      }
+      
+      if (opts.onlyShrinkWhenNeeded && text.length < NUM_NERVOUS_CHARS) {
+        return;
+      }
+
+      while (true) {
+        result = parse_url.exec(text);
+        if (result) {
+          console.log("shrinkTweet url: " + result[0]);
+          if (result[0].length > MIN_URL_LEN) {
+            shortenUrl(result[0], callback);
+          }
+        } else {
+          break;
+        }
+      }
+
+      updateInput(textarea, countElem);
+    };
+
     var saveOptions = function(options) {
       var optionsString = JSON.stringify(options);
       localStorage.options = optionsString;
@@ -181,6 +189,7 @@
     
     var updateOptions = function(options) {
       // Why doesn't $("#autoshrinku").attr('checked', boolean); work?
+      $('input[id=autoshrinkneeded]').attr('checked', options.onlyShrinkWhenNeeded);
       $('input[id=autoshrinku]').attr('checked', options.autoShrinkURLs);
       $('input[id=autoshrinkw]').attr('checked', options.autoShrinkWords);
       $('input[id=locationopt]').attr('checked', options.useLocation);
@@ -200,7 +209,7 @@
     opts = $.extend({}, defaults, opts, getOptions());
     
     // Add buttons and counter after textarea div
-    $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs</div><div id="counterdiv" style="float: right;">' +
+    $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs<input type="checkbox" id="autoshrinkneeded"/>Shrink Needed</div><div id="counterdiv" style="float: right;">' +
       '<span id="charcount" class="tweet-counter">140</span></div></div>').appendTo(".twinputdiv");
     $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
     
@@ -245,6 +254,11 @@
       
       $("#autoshrinku").click(function() {
         opts.autoShrinkURLs = $("#autoshrinku").attr('checked');
+        saveOptions(opts);
+      });
+      
+      $("#autoshrinkneeded").click(function() {
+        opts.onlyShrinkWhenNeeded = $("#autoshrinkneeded").attr('checked');
         saveOptions(opts);
       });
       
