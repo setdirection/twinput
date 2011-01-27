@@ -141,6 +141,7 @@
     
     // Shrink URLs, common words, etc.
     var shrinkTweet = function(textarea, countElem) {
+      console.log("shrinkTweet called");
       var result;
       var text = textarea.val();
       // Stolen from Crockford
@@ -154,10 +155,6 @@
         return;
       }
       
-      if (opts.onlyShrinkWhenNeeded && text.length < NUM_NERVOUS_CHARS) {
-        return;
-      }
-
       while (true) {
         result = parse_url.exec(text);
         if (result) {
@@ -196,11 +193,16 @@
     };
     
     var handleKeyDown = function(event, textarea, charCount, tweetBtn) {
+      var text = textarea.val();
       updateInput(textarea, charCount, tweetBtn);
       //console.log("handleKeyDown keyCode: " + event.keyCode);
       //var character = event.keyCode ? String.fromCharCode(event.keyCode) : null;
       //console.log("Keydown char: " + character);
       if (event.keyCode === 32 && opts.autoShrinkURLs) {
+        if (opts.onlyShrinkWhenNeeded && text && text.length < NUM_NERVOUS_CHARS) {
+          return;
+        }
+
         shrinkTweet(textarea, charCount);
       }
     };
@@ -238,8 +240,25 @@
         reloadTweet(textarea, charCount, tweetBtn);
       });
 
-      $("#shrinktweet").click(function() {
+      // Event binding for shrink tweet
+      textarea.bind("shrinkTweetEvent", function(e) {
         shrinkTweet(textarea, charCount);
+      });
+      
+      // Register shrink tweet button click event
+      $("#shrinktweet").click(function() {
+        textarea.trigger("shrinkTweetEvent");
+      });
+      
+      // Register key bindings for shrink tweet
+      textarea.bind('keydown', 'Ctrl+s', function(e) {
+        textarea.trigger("shrinkTweetEvent");
+        return false;
+      });
+      
+      textarea.bind('keydown', 'Meta+s', function(e) {
+        textarea.trigger("shrinkTweetEvent");
+        return false;
       });
       
       $("#locationopt").click(function() {
@@ -262,7 +281,7 @@
         saveOptions(opts);
       });
       
-      var timer = setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, TIMER_INTERVAL); 
+      setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, TIMER_INTERVAL); 
 
     });
     
