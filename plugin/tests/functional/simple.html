@@ -3,6 +3,8 @@
 <head>
     <title>Simple Test of Twinput</title>
     <link rel="stylesheet" type="text/css" href="simple.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="../../../vendor/jquery-ui-1.8.9.custom/css/smoothness/jquery-ui-1.8.9.custom.css"> 
+  	
 </head>
 
 <body>
@@ -10,10 +12,9 @@
     <div><span class="title">Say Something:</span></div>
     <div class="twinputdiv"><textarea class="twitter"></textarea></div>
   </div>
-  <h1>Your recent tweets</h1>
-  <div style="float: left" id="posts">Getting your tweets...</div>
     
   <script src="../../../vendor/jquery/jquery-1.4.4.js"></script>
+  <script src="../../../vendor/jquery-ui-1.8.9.custom/js/jquery-ui-1.8.9.custom.min.js"></script>
   <script src="../../../vendor/jquery.twitter/jquery.jtwitter.js"></script>
   <script src="../../../vendor/jquery.hotkeys/jquery.hotkeys.js"></script>
   <script src="../../../plugin/src/twinput.js"></script>
@@ -22,20 +23,6 @@
 
       $(".twitter").twinput();
       
-      // Print recent tweets for user. Show use of jTwitter plugin
-      $.jTwitter('ewpreston', 10, function(data){
-        $('#posts').empty();
-                $.each(data, function(i, post){
-                    $('#posts').append(
-                        '<div class="post">'
-                        +' <div class="txt">'
-                        // See output-demo.js file for details
-                        + (i+1) + '. '+    post.text
-                        +' </div>'
-                        +'</div>'
-                    );
-                });
-      });
     });
   </script>
 </body>

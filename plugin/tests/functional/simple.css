@@ -29,3 +29,8 @@ div.twinputdiv {
   margin-top: 5px; 
   margin-bottom: 5px;
 }
+
+div.tweets {
+  font: normal normal normal 16px/normal 'helvetica neue', 'lucida grande', helvetica, arial;
+  font-size: 80%;
+}

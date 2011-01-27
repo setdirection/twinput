@@ -207,13 +207,39 @@
       }
     };
     
+		var $tweetsdialog = $('<div class="tweets" id="tweets"></div>')
+				.html('<p>Retrieving your tweets...</p>')
+				.dialog({
+					autoOpen: false,
+					title: 'Your Recent Tweets',
+					disabled: true,
+					closeOnEscape: true
+				});
+				
+		$tweetsdialog.bind("dialogopen", function(event, ui) {
+      // Print recent tweets for user. Show use of jTwitter plugin
+      $.jTwitter('ewpreston', 10, function(data){
+        $('#tweets').empty();
+        $.each(data, function(i, post){
+            $('#tweets').append(
+                '<div class="post">'
+                +' <div class="txt">'
+                // See output-demo.js file for details
+                + (i+1) + '. '+    post.text
+                +' </div>'
+                +'</div>'
+            );
+        });
+      });
+    });
+
     // merge opts to clobber defaults
     opts = $.extend({}, defaults, opts, getOptions());
     
     // Add buttons and counter after textarea div
     $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs<input type="checkbox" id="autoshrinkneeded"/>Shrink Needed</div><div id="counterdiv" style="float: right;">' +
       '<span id="charcount" class="tweet-counter">140</span></div></div>').appendTo(".twinputdiv");
-    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
+    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="showtweets">Recent Tweets</button><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
     
     updateOptions(opts);
     
@@ -222,6 +248,7 @@
       var textarea = $(this);
       var tweetBtn = $("#tweetbtn");
       var charCount = $("#charcount");
+
       tweetBtn.attr('DISABLED', true);
 
       textarea.keydown(function(event) {
@@ -279,6 +306,10 @@
       $("#autoshrinkneeded").click(function() {
         opts.onlyShrinkWhenNeeded = $("#autoshrinkneeded").attr('checked');
         saveOptions(opts);
+      });
+      
+      $("#showtweets").click(function() {
+        $tweetsdialog.dialog("open");
       });
       
       setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, TIMER_INTERVAL); 
