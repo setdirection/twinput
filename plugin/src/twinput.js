@@ -139,9 +139,8 @@
       expandTypingArea     : false  // the input is made larger so you can see everything
     };
     
-    // Shrink URLs, common words, etc.
-    var shrinkTweet = function(textarea, countElem) {
-      console.log("shrinkTweet called");
+    // Shrink URLs
+    var shrinkUrls = function(textarea, countElem) {
       var result;
       var text = textarea.val();
       // Stolen from Crockford
@@ -158,12 +157,62 @@
       while (true) {
         result = parse_url.exec(text);
         if (result) {
-          console.log("shrinkTweet url: " + result[0]);
+          console.log("shrinkUrls url: " + result[0]);
           if (result[0].length > MIN_URL_LEN) {
             shortenUrl(result[0], callback);
           }
         } else {
           break;
+        }
+      }
+
+      updateInput(textarea, countElem);
+    };
+
+    // Shrink words
+    var shrinkWords = function(textarea, countElem) {
+      var result, i;
+      var text = textarea.val();
+      var words = [ 
+                    { regex: /\sand\s/gmi,
+                      sword: '&'
+                    },
+                    { regex: /\sabout\s/gmi,
+                      sword: 'ab'
+                    },
+                    { regex: /\sbefore\s/gmi,
+                      sword: 'b4'
+                    },
+                    { regex: /\sbecause\s/gmi,
+                      sword: 'b/c'
+                    },
+                    { regex: /\sbackground\s/gmi,
+                      sword: 'bgd'
+                    },
+                    { regex: /\scheck\s/gmi,
+                      sword: 'chk'
+                    },
+                    { regex: /\soverheard\s/gmi,
+                      sword: 'OH'
+                    },
+                    { regex: /\si see\s/gmi,
+                      sword: 'IC'
+                    }
+                  ];
+
+      if (!text) {
+        return;
+      }
+      
+      for (i = 0; i < words.length; i += 1) {
+        while (true) {
+          result = words[i].regex.exec(text);
+          if (result) {
+            textarea.val(text.replace(result[0].trim(), words[i].sword));
+            text = textarea.val();
+          } else {
+            break;
+          }
         }
       }
 
@@ -198,12 +247,18 @@
       //console.log("handleKeyDown keyCode: " + event.keyCode);
       //var character = event.keyCode ? String.fromCharCode(event.keyCode) : null;
       //console.log("Keydown char: " + character);
-      if (event.keyCode === 32 && opts.autoShrinkURLs) {
+      if (event.keyCode === 32) {
         if (opts.onlyShrinkWhenNeeded && text && text.length < NUM_NERVOUS_CHARS) {
           return;
         }
 
-        shrinkTweet(textarea, charCount);
+        if (opts.autoShrinkURLs) {
+          shrinkUrls(textarea, charCount);
+        }
+        
+        if (opts.autoShrinkWords) {
+          shrinkWords(textarea, charCount);
+        }
       }
     };
     
@@ -239,7 +294,7 @@
     // Add buttons and counter after textarea div
     $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs<input type="checkbox" id="autoshrinkneeded"/>Shrink Needed</div><div id="counterdiv" style="float: right;">' +
       '<span id="charcount" class="tweet-counter">140</span></div></div>').appendTo(".twinputdiv");
-    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="showtweets">Recent Tweets</button><button id="shrinktweet">Shrink</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
+    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="showtweets">Recent Tweets</button><button id="shrinkUrls">Shrink URLs</button><button id="shrinkWords">Shrink Words</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
     
     updateOptions(opts);
     
@@ -267,24 +322,45 @@
         reloadTweet(textarea, charCount, tweetBtn);
       });
 
-      // Event binding for shrink tweet
-      textarea.bind("shrinkTweetEvent", function(e) {
-        shrinkTweet(textarea, charCount);
+      // Event binding for shrink URLs
+      textarea.bind("shrinkUrlEvent", function(e) {
+        shrinkUrls(textarea, charCount);
       });
       
-      // Register shrink tweet button click event
-      $("#shrinktweet").click(function() {
-        textarea.trigger("shrinkTweetEvent");
+      // Register shrink URL button click event
+      $("#shrinkUrls").click(function() {
+        textarea.trigger("shrinkUrlEvent");
       });
       
-      // Register key bindings for shrink tweet
+      // Register key bindings for shrink URL
       textarea.bind('keydown', 'Ctrl+s', function(e) {
-        textarea.trigger("shrinkTweetEvent");
+        textarea.trigger("shrinkUrlEvent");
         return false;
       });
       
       textarea.bind('keydown', 'Meta+s', function(e) {
-        textarea.trigger("shrinkTweetEvent");
+        textarea.trigger("shrinkUrlEvent");
+        return false;
+      });
+      
+      // Event binding for shrink words
+      textarea.bind("shrinkWordEvent", function(e) {
+        shrinkWords(textarea, charCount);
+      });
+      
+      // Register shrink URL button click event
+      $("#shrinkWords").click(function() {
+        textarea.trigger("shrinkWordEvent");
+      });
+      
+      // Register key bindings for shrink URL
+      textarea.bind('keydown', 'Ctrl+w', function(e) {
+        textarea.trigger("shrinkWordEvent");
+        return false;
+      });
+      
+      textarea.bind('keydown', 'Meta+w', function(e) {
+        textarea.trigger("shrinkWordEvent");
         return false;
       });
       
