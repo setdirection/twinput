@@ -174,28 +174,28 @@
       var result, i;
       var text = textarea.val();
       var words = [ 
-                    { regex: /\sand\s/gmi,
+                    { regex: /(^|\s)and(\s|$)/gmi,
                       sword: '&'
                     },
-                    { regex: /\sabout\s/gmi,
+                    { regex: /(^|\s)about(\s|$)/gmi,
                       sword: 'ab'
                     },
-                    { regex: /\sbefore\s/gmi,
+                    { regex: /(^|\s)before(\s|$)/gmi,
                       sword: 'b4'
                     },
-                    { regex: /\sbecause\s/gmi,
+                    { regex: /(^|\s)because(\s|$)/gmi,
                       sword: 'b/c'
                     },
-                    { regex: /\sbackground\s/gmi,
+                    { regex: /(^|\s)background(\s|$)/gmi,
                       sword: 'bgd'
                     },
-                    { regex: /\scheck\s/gmi,
+                    { regex: /(^|\s)check(\s|$)/gmi,
                       sword: 'chk'
                     },
-                    { regex: /\soverheard\s/gmi,
+                    { regex: /(^|\s)overheard(\s|$)/gmi,
                       sword: 'OH'
                     },
-                    { regex: /\si see\s/gmi,
+                    { regex: /(^|\s)i see(\s|$)/gmi,
                       sword: 'IC'
                     }
                   ];
@@ -354,12 +354,12 @@
       });
       
       // Register key bindings for shrink URL
-      textarea.bind('keydown', 'Ctrl+w', function(e) {
+      textarea.bind('keydown', 'Ctrl+e', function(e) {
         textarea.trigger("shrinkWordEvent");
         return false;
       });
       
-      textarea.bind('keydown', 'Meta+w', function(e) {
+      textarea.bind('keydown', 'Meta+e', function(e) {
         textarea.trigger("shrinkWordEvent");
         return false;
       });
