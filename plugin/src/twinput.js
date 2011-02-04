@@ -174,28 +174,28 @@
       var result, i;
       var text = textarea.val();
       var words = [ 
-                    { regex: /(^|\s)and(\s|$)/gmi,
+                    { regex: /(^|\s)(and)(\s|\.|;|,|$)/gmi,
                       sword: '&'
                     },
-                    { regex: /(^|\s)about(\s|$)/gmi,
+                    { regex: /(^|\s)(about)(\s|\.|;|,|$)/gmi,
                       sword: 'ab'
                     },
-                    { regex: /(^|\s)before(\s|$)/gmi,
+                    { regex: /(^|\s)(before)(\s|\.|;|,|$)/gmi,
                       sword: 'b4'
                     },
-                    { regex: /(^|\s)because(\s|$)/gmi,
+                    { regex: /(^|\s)(because)(\s|\.|;|,|$)/gmi,
                       sword: 'b/c'
                     },
-                    { regex: /(^|\s)background(\s|$)/gmi,
+                    { regex: /(^|\s)(background)(\s|\.|;|,|$)/gmi,
                       sword: 'bgd'
                     },
-                    { regex: /(^|\s)check(\s|$)/gmi,
+                    { regex: /(^|\s)(check)(\s|\.|;|,|$)/gmi,
                       sword: 'chk'
                     },
-                    { regex: /(^|\s)overheard(\s|$)/gmi,
+                    { regex: /(^|\s)(overheard)(\s|\.|;|,|$)/gmi,
                       sword: 'OH'
                     },
-                    { regex: /(^|\s)i see(\s|$)/gmi,
+                    { regex: /(^|\s)(i see)(\s|\.|;|,|$)/gmi,
                       sword: 'IC'
                     }
                   ];
@@ -207,8 +207,9 @@
       for (i = 0; i < words.length; i += 1) {
         while (true) {
           result = words[i].regex.exec(text);
+          console.log("shrinkWords result: " + result);
           if (result) {
-            textarea.val(text.replace(result[0].trim(), words[i].sword));
+            textarea.val(text.replace(result[2].trim(), words[i].sword));
             text = textarea.val();
           } else {
             break;
@@ -262,7 +263,7 @@
       }
     };
     
-		var $tweetsdialog = $('<div class="tweets" id="tweets"></div>')
+		var $tweetsDialog = $('<div class="tweets" id="tweets"></div>')
 				.html('<p>Retrieving your tweets...</p>')
 				.dialog({
 					autoOpen: false,
@@ -271,7 +272,7 @@
 					closeOnEscape: true
 				});
 				
-		$tweetsdialog.bind("dialogopen", function(event, ui) {
+		$tweetsDialog.bind("dialogopen", function(event, ui) {
       // Print recent tweets for user. Show use of jTwitter plugin
       $.jTwitter('ewpreston', 10, function(data){
         $('#tweets').empty();
@@ -288,13 +289,30 @@
       });
     });
 
+		var $paletteDialog = $('<div class="palette" id="palette"></div>')
+				.html('<p>Configuring the palette...</p>')
+				.dialog({
+					autoOpen: false,
+					title: 'Fun Characters',
+					disabled: true,
+					closeOnEscape: true
+				});
+				
+		$paletteDialog.bind("dialogopen", function(event, ui) {
+      // character palette popup
+      $('#palette').empty();
+      $('#palette').append(
+          '<span id="recycle">A</span>'
+      );
+    });
+
     // merge opts to clobber defaults
     opts = $.extend({}, defaults, opts, getOptions());
     
     // Add buttons and counter after textarea div
     $('<div id="optionsrow"><div id="optionsdiv" style="float: left;"><input type="checkbox" id="locationopt"/>Location<input type="checkbox" id="autoshrinkw"/>Shrink Words<input type="checkbox" id="autoshrinku"/>Shrink URLs<input type="checkbox" id="autoshrinkneeded"/>Shrink Needed</div><div id="counterdiv" style="float: right;">' +
       '<span id="charcount" class="tweet-counter">140</span></div></div>').appendTo(".twinputdiv");
-    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="showtweets">Recent Tweets</button><button id="shrinkUrls">Shrink URLs</button><button id="shrinkWords">Shrink Words</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
+    $('<div id="buttondiv" style="clear: both;"><button id="tweetbtn">Tweet</button><button id="showtweets">Recent Tweets</button><button id="charPalette">Chars</button><button id="shrinkUrls">Shrink URLs</button><button id="shrinkWords">Shrink Words</button><button id="cleartweet">Clear</button><button id="reloadtweet">Reload</button></div>').appendTo(".twinputdiv");
     
     updateOptions(opts);
     
@@ -385,7 +403,11 @@
       });
       
       $("#showtweets").click(function() {
-        $tweetsdialog.dialog("open");
+        $tweetsDialog.dialog("open");
+      });
+      
+      $("#charPalette").click(function() {
+        $paletteDialog.dialog("open");
       });
       
       setInterval(function() { doIntervalStuff(textarea, charCount, tweetBtn); }, TIMER_INTERVAL); 
