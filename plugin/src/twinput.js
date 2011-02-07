@@ -209,7 +209,7 @@
           result = words[i].regex.exec(text);
           console.log("shrinkWords result: " + result);
           if (result) {
-            textarea.val(text.replace(result[2].trim(), words[i].sword));
+            textarea.val(text.replace(result[0], result[1] + words[i].sword + result[3]));
             text = textarea.val();
           } else {
             break;
@@ -302,7 +302,7 @@
       // character palette popup
       $('#palette').empty();
       $('#palette').append(
-          '<span id="recycle">A</span>'
+          '<table><tr><td id="recycle">♺</td></tr></table>'
       );
     });
 
